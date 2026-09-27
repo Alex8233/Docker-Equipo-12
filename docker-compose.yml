@@ -1,18 +1,22 @@
 services:
+  # Base de datos MySQL
   mysql:
     image: mysql:8.0
     container_name: MySQL
 
+    # Variables de configuración de MySQL
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
+    # Persistencia de datos y script de inicialización
     volumes:
       - mysql_data:/var/lib/mysql
       - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
 
+    # Comprueba que MySQL esté listo para recibir conexiones
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -21,11 +25,14 @@ services:
 
     networks:
       - red_app
+
+  # Backend desarrollado con FastAPI
   backend:
     
     build: ./backend
     container_name: backend_fastapi
     
+    # Datos necesarios para conectarse a MySQL
     environment:
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
@@ -33,9 +40,11 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     
+    # Expone FastAPI en el puerto 8000 del host
     ports:
       - "8000:8000"
     
+    # Espera a que MySQL esté saludable
     depends_on:
       mysql:
         condition: service_healthy
@@ -43,24 +52,27 @@ services:
     networks:
       - red_app
 
-  
+  # Frontend estático servido mediante Nginx
   frontend:
     build: ./frontend
     container_name: frontend_nginx
 
+    # Puerto 3000 del host -> puerto 80 de Nginx
     ports:
       - "3000:80"
 
+    # El frontend necesita que el backend esté iniciado
     depends_on:
       - backend
 
     networks:
       - red_app
 
-
+# Volumen persistente para MySQL
 volumes:
   mysql_data:
 
+# Red bridge personalizada para comunicar los servicios
 networks:
   red_app:
     driver: bridge
