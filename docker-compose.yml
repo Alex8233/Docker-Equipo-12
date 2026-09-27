@@ -21,6 +21,27 @@ services:
 
     networks:
       - red_app
+  backend:
+    
+    build: ./backend
+    container_name: backend_fastapi
+    
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    
+    ports:
+      - "8000:8000"
+    
+    depends_on:
+      mysql:
+        condition: service_healthy
+    
+    networks:
+      - red_app
 
 volumes:
   mysql_data:
