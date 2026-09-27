@@ -43,6 +43,21 @@ services:
     networks:
       - red_app
 
+  
+  frontend:
+    build: ./frontend
+    container_name: frontend_nginx
+
+    ports:
+      - "3000:80"
+
+    depends_on:
+      - backend
+
+    networks:
+      - red_app
+
+
 volumes:
   mysql_data:
 
